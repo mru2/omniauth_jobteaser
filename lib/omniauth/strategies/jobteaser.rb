@@ -4,7 +4,9 @@ module OmniAuth
   module Strategies
     class Jobteaser < OmniAuth::Strategies::OAuth2
 
-      option :client_options, site: "https://www.jobteaser.com"
+      option :name, 'jobteaser'
+
+      option :client_options, site: 'https://www.jobteaser.com'
 
       def raw_info
         binding.pry
