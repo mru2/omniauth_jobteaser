@@ -18,11 +18,76 @@ Or install it yourself as:
 
     $ gem install omniauth_jobteaser
 
-## Usage
+## Sample setup
 
-TODO: Write usage instructions here
+Register your application on `https://www.jobteaser.com/oauth/applications`
 
-## Sample app
+```ruby
+# Gemfile
+gem 'omniauth'
+```
+
+```ruby
+# config/initializers/omniauth.rb
+Rails.application.config.middleware.use OmniAuth::Builder do
+  provider :jobteaser,
+           YOUR_JOBTEASER_KEY,
+           YOUR_JOBTEASER_SECRET
+end
+```
+
+```ruby
+# config/routes.rb
+get '/auth/:provider/callback', to: 'sessions#create'
+```
+
+```ruby
+# app/controllers/application_controller.rb
+class ApplicationController < ActionController::Base
+  before_action :ensure_signed_in
+
+  def ensure_signed_in
+    return if session[:current_jt_user]
+    redirect_to '/auth/jobteaser' and return
+  end
+end
+```
+
+```ruby
+# app/controllers/session_controller.rb
+class SessionsController < ApplicationController
+
+  skip_before_action :ensure_signed_in
+
+  def create
+    session[:current_jt_user] = {
+      token: request.env['omniauth.auth'].extra[:token], # For API calls
+      info: request.env['omniauth.auth'].info # First name, last name, etc ...
+    }
+
+    redirect_to root_path
+  end
+end
+```
+
+With the token in session, you can request the APIs as a logged user whenever you want
+
+```ruby
+  # app/controllers/another_controller.rb
+  def show
+    client = Omniauth::Jobteaser::AccessToken.load(session[:current_jt_user]['token'])
+    @user_info = JSON.parse(client.get('/fr/api/users/me').body)
+  end
+```
+
+You also have access to the basic user info without needing any API call
+```ruby
+  # app/controllers/another_controller.rb
+  def show
+    @first_name = session[:current_jt_user]['info']['first_name']
+  end
+```
+
 
 
 ## Development
