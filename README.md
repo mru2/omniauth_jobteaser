@@ -20,7 +20,7 @@ Or install it yourself as:
 
 ## Sample setup
 
-Register your application on `https://www.jobteaser.com/oauth/applications`
+Register your application on `https://www.jobteaser.com/oauth/applications`. Use `http://<your-host>/auth/jobteaser/callback` as a callback uri
 
 ```ruby
 # Gemfile
